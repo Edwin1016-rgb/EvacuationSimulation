@@ -1,0 +1,14 @@
+{
+    "steps_taken": 32,
+    "fire_spread_probability": 0.4975562072336266,
+    "breakdown_by_agent_type": {
+        "Agent": {
+            "evacuated": 8,
+            "trapped": 1
+        },
+        "IndependentCheckpointAgent": {
+            "evacuated": 4,
+            "trapped": 5
+        }
+    }
+}

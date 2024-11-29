@@ -1,0 +1,13 @@
+{
+    "steps_taken": 32,
+    "breakdown_by_agent_type": {
+        "Agent": {
+            "evacuated": 7,
+            "trapped": 2
+        },
+        "IndependentCheckpointAgent": {
+            "evacuated": 1,
+            "trapped": 8
+        }
+    }
+}

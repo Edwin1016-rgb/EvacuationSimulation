@@ -1,0 +1,80 @@
+from src.agent import Agent
+import heapq
+
+class CheckpointAgent(Agent):
+    def __init__(self, position):
+        super().__init__(position, goal=None)  # No tiene meta fija inicial
+        self.checkpoint_goal = None  # Siguiente punto de control
+
+    def move(self, environment):
+        """Mueve al agente siguiendo los puntos de control."""
+        if not self.alive:
+            return
+
+        # Si ya llegó al punto de control actual, busca el siguiente
+        if self.position == self.checkpoint_goal:
+            self.checkpoint_goal = self.find_next_checkpoint(environment)
+
+        if self.checkpoint_goal:
+            # Busca la ruta al siguiente punto de control
+            path = self.a_star(environment, self.checkpoint_goal)  # Pasar environment y checkpoint_goal
+            if path:
+                self.position = path[0]  # Moverse al primer paso de la ruta
+
+        # Si no hay más puntos de control, marca al agente como evacuado
+        if self.position == self.checkpoint_goal:
+            self.alive = False  # El agente ha evacuado
+
+    def find_next_checkpoint(self, environment):
+        """Encuentra el siguiente punto de control o salida."""
+        if self.position in environment.checkpoints:
+            return environment.checkpoints[self.position]  # Siguiente checkpoint
+        return None  # Sin más puntos, termina la ruta
+
+    def a_star(self, environment, goal):
+        """Implementación del algoritmo A* para encontrar el camino hacia el objetivo."""
+        start = self.position
+        open_list = []
+        heapq.heappush(open_list, (0, start))  # Prioridad basada en el costo
+        came_from = {}  # Para reconstruir el camino
+        g_score = {start: 0}  # Costo desde el inicio
+        f_score = {start: self.heuristic(start, goal)}  # Costo estimado total
+
+        while open_list:
+            _, current = heapq.heappop(open_list)
+
+            if current == goal:
+                return self.reconstruct_path(came_from, current)  # Reconstruir el camino hacia el objetivo
+
+            for neighbor in self.get_neighbors(current, environment):
+                tentative_g_score = g_score[current] + 1  # Suponemos que el costo de movernos a un vecino es 1
+
+                if tentative_g_score < g_score.get(neighbor, float('inf')):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+                    heapq.heappush(open_list, (f_score[neighbor], neighbor))
+
+        return None  # Si no hay un camino hacia el objetivo
+
+    def heuristic(self, position, goal):
+        """Función heurística (distancia Manhattan) para A*."""
+        return abs(position[0] - goal[0]) + abs(position[1] - goal[1])
+
+    def reconstruct_path(self, came_from, current):
+        """Reconstruir el camino recorrido usando el diccionario came_from."""
+        path = []
+        while current in came_from:
+            path.append(current)
+            current = came_from[current]
+        path.reverse()
+        return path
+
+    def get_neighbors(self, position, environment):
+        """Devuelve los vecinos válidos para la posición dada en el entorno."""
+        neighbors = []
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            new_pos = (position[0] + dx, position[1] + dy)
+            if environment.is_valid_position(new_pos):  # Verificar si la nueva posición es válida
+                neighbors.append(new_pos)
+        return neighbors

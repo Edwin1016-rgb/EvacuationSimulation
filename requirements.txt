@@ -1,0 +1,4 @@
+pyinstaller==6.11.1
+pywin32==305
+numpy==1.25.0
+matplotlib==3.8.0

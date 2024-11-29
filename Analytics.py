@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 
 class Analytics:
-    def __init__(self, results_folder="simulation_results"):
+    def __init__(self, results_folder="dist/simulation_results"):
         self.results_folder = results_folder
         self.data = []
         self.summary = {
